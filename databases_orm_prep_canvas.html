@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Databases + SQL Basics + Why ORMs Exist (Prep for SQLAlchemy)</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; line-height: 1.5; padding: 24px; max-width: 980px; margin: 0 auto; }
+    h1, h2, h3 { line-height: 1.2; }
+    .callout { border-left: 5px solid #3b82f6; background: #eff6ff; padding: 12px 14px; margin: 16px 0; border-radius: 8px; }
+    .warn { border-left-color: #f59e0b; background: #fffbeb; }
+    .ok { border-left-color: #10b981; background: #ecfdf5; }
+    pre { background: #0b1020; color: #e5e7eb; padding: 14px; border-radius: 10px; overflow: auto; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    table { border-collapse: collapse; width: 100%; margin: 10px 0 18px; }
+    th, td { border: 1px solid #e5e7eb; padding: 8px 10px; text-align: left; vertical-align: top; }
+    th { background: #f9fafb; }
+    ul { margin-top: 6px; }
+    .small { color: #6b7280; font-size: 0.95em; }
+    .kbd { padding: 1px 6px; border: 1px solid #d1d5db; border-bottom-width: 2px; border-radius: 6px; background: #fff; font-family: inherit; }
+  </style>
+</head>
+<body>
+
+<h1>Databases + SQL Basics + Why ORMs Exist (Prep for SQLAlchemy)</h1>
+
+<div class="callout">
+  <strong>Goal for today:</strong> Understand what a relational database is, how SQL works at a basic level, and why ORMs (like SQLAlchemy) are useful.
+  <br/>
+  <span class="small">Next lesson we’ll connect this to SQLAlchemy models, sessions, and queries.</span>
+</div>
+
+<h2>1) What is a database?</h2>
+<p>
+  A <strong>database</strong> is an organized, persistent way to store and retrieve data. When your program exits, the data should still exist.
+  A common type you will use in web apps is a <strong>relational database</strong> (SQL database) such as PostgreSQL, MySQL, or SQLite.
+</p>
+
+<h3>Relational (SQL) databases in one sentence</h3>
+<p>
+  A relational database stores data in <strong>tables</strong> (like spreadsheets), where each row is a record and each column is a field —
+  and it enforces rules about how data relates across tables.
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Term</th>
+      <th>Meaning</th>
+      <th>Example</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Table</strong></td>
+      <td>A named set of rows with the same columns</td>
+      <td><code>students</code></td>
+    </tr>
+    <tr>
+      <td><strong>Row</strong></td>
+      <td>One record (one “thing”)</td>
+      <td>One student: “Ava”</td>
+    </tr>
+    <tr>
+      <td><strong>Column</strong></td>
+      <td>A field on each row</td>
+      <td><code>email</code>, <code>created_at</code></td>
+    </tr>
+    <tr>
+      <td><strong>Primary Key (PK)</strong></td>
+      <td>Unique identifier for a row</td>
+      <td><code>id</code> (an integer)</td>
+    </tr>
+    <tr>
+      <td><strong>Foreign Key (FK)</strong></td>
+      <td>A reference to a row in another table</td>
+      <td><code>enrollments.student_id → students.id</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout ok">
+  <strong>Mental model:</strong> In a relational database, data is split into multiple tables (to avoid duplicates), and relationships are expressed using foreign keys.
+</div>
+
+<h2>2) Why not store everything in Python lists/dicts?</h2>
+<ul>
+  <li><strong>Persistence:</strong> lists/dicts disappear when the program stops.</li>
+  <li><strong>Concurrency:</strong> multiple users/processes need safe access at the same time.</li>
+  <li><strong>Querying:</strong> you want “all students with average grade &gt; 90” without manually looping through everything.</li>
+  <li><strong>Integrity:</strong> databases enforce rules like uniqueness, non-null, valid relationships, etc.</li>
+</ul>
+
+<h2>3) SQL: the language of relational databases</h2>
+<p>
+  <strong>SQL</strong> (Structured Query Language) is how you ask a relational database to store, update, and retrieve data.
+  SQL has categories of commands:
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Category</th>
+      <th>What it’s for</th>
+      <th>Examples</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>DDL</strong> (Data Definition Language)</td>
+      <td>Define/modify tables and constraints</td>
+      <td><code>CREATE TABLE</code>, <code>ALTER TABLE</code>, <code>DROP TABLE</code></td>
+    </tr>
+    <tr>
+      <td><strong>DML</strong> (Data Manipulation Language)</td>
+      <td>Insert/update/delete rows</td>
+      <td><code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code></td>
+    </tr>
+    <tr>
+      <td><strong>DQL</strong> (Data Query Language)</td>
+      <td>Query data</td>
+      <td><code>SELECT</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Core SQL patterns you should recognize</h3>
+
+<p><strong>Create a table</strong></p>
+<pre><code>CREATE TABLE students (
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT UNIQUE NOT NULL
+);</code></pre>
+
+<p><strong>Insert rows</strong></p>
+<pre><code>INSERT INTO students (name, email)
+VALUES ('Ava', 'ava@example.com');</code></pre>
+
+<p><strong>Select rows</strong></p>
+<pre><code>SELECT id, name, email
+FROM students
+WHERE email LIKE '%@example.com'
+ORDER BY name;</code></pre>
+
+<p><strong>Update rows</strong></p>
+<pre><code>UPDATE students
+SET name = 'Ava Chen'
+WHERE id = 1;</code></pre>
+
+<p><strong>Delete rows</strong></p>
+<pre><code>DELETE FROM students
+WHERE id = 1;</code></pre>
+
+<div class="callout warn">
+  <strong>Important safety rule:</strong> never build SQL by concatenating user input.
+  Use <strong>parameterized queries</strong> instead (we'll practice this today).
+</div>
+
+<h2>4) Relationships and joins (the “relational” part)</h2>
+<p>
+  Real apps almost never use just one table. For example, a student can have many grades:
+</p>
+
+<pre><code>students (id, name, email)
+assignments (id, title, max_points)
+grades (id, student_id, assignment_id, score)</code></pre>
+
+<p>To connect data across tables, we use a <strong>JOIN</strong>:</p>
+
+<pre><code>SELECT s.name, a.title, g.score
+FROM grades g
+JOIN students s ON g.student_id = s.id
+JOIN assignments a ON g.assignment_id = a.id
+ORDER BY s.name, a.title;</code></pre>
+
+<div class="callout ok">
+  <strong>Translation:</strong> “Give me grade rows, but also attach the related student and assignment information.”
+</div>
+
+<h2>5) Transactions: all-or-nothing updates</h2>
+<p>
+  A <strong>transaction</strong> is a group of database changes that succeed together or fail together.
+  This prevents “half-completed” updates.
+</p>
+<ul>
+  <li><strong>COMMIT</strong>: make changes permanent</li>
+  <li><strong>ROLLBACK</strong>: undo changes from the current transaction</li>
+</ul>
+
+<h2>6) Where does Python fit in?</h2>
+<p>
+  Python can talk to databases in two common ways:
+</p>
+
+<ol>
+  <li>
+    <strong>Raw SQL</strong> (what we do today): you send SQL strings and parameters using a library.
+    <br/><span class="small">Pros: direct control and good to learn fundamentals. Cons: lots of repetitive code.</span>
+  </li>
+  <li>
+    <strong>ORM</strong> (what we do next): you work with Python classes/objects and the ORM generates SQL behind the scenes.
+    <br/><span class="small">Pros: safer and less boilerplate; integrates well with app code. Cons: you still must understand SQL to debug/optimize.</span>
+  </li>
+</ol>
+
+<h2>7) What is an ORM, in plain English?</h2>
+<p>
+  An <strong>ORM</strong> (Object-Relational Mapper) lets you treat database rows like Python objects.
+  You define Python classes (models), and the ORM maps them to tables.
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>You think in Python</th>
+      <th>Database reality</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>Student(name="Ava", email="ava@x.com")</code></td>
+      <td>One row in <code>students</code></td>
+    </tr>
+    <tr>
+      <td><code>student.grades</code></td>
+      <td>Rows in <code>grades</code> joined by <code>student_id</code></td>
+    </tr>
+    <tr>
+      <td><code>session.add(student)</code></td>
+      <td><code>INSERT</code> (then commit)</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout">
+  <strong>What SQLAlchemy will add next lesson:</strong>
+  <ul>
+    <li>Model classes (<code>Student</code>, <code>Assignment</code>, <code>Grade</code>)</li>
+    <li>A database “session” that tracks changes and commits them</li>
+    <li>Query building that stays parameterized and safe</li>
+    <li>Migrations later (versioning your database schema)</li>
+  </ul>
+</div>
+
+<h2>8) Today’s practice plan</h2>
+<ol>
+  <li>Run <code>demo.py</code> and watch it build a small SQLite database from scratch.</li>
+  <li>Practice writing and executing SQL safely in <code>exercises.py</code>.</li>
+  <li>Start the mini “Gradebook DB” homework in <code>homework.py</code>.</li>
+</ol>
+
+<h2>9) Running the code</h2>
+<p>From your project folder:</p>
+<pre><code>python demo.py
+python exercises.py
+python homework.py</code></pre>
+
+<div class="callout warn">
+  <strong>Note:</strong> We are using SQLite today because it is built into Python and requires no setup.
+  The SQL concepts transfer directly to PostgreSQL/MySQL, which are common in production.
+</div>
+
+<h2>10) Quick checklist (what you should be comfortable with after today)</h2>
+<ul>
+  <li>I can explain what tables, rows, columns, primary keys, and foreign keys are.</li>
+  <li>I can write basic <code>SELECT</code>, <code>INSERT</code>, <code>UPDATE</code>, and <code>DELETE</code>.</li>
+  <li>I can explain what a join does at a high level.</li>
+  <li>I can use parameterized SQL in Python (no string concatenation with user input).</li>
+  <li>I understand why an ORM is helpful — and why SQL knowledge still matters.</li>
+</ul>
+
+<hr/>
+
+
+</body>
+</html>

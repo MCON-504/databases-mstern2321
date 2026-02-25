@@ -1,0 +1,24 @@
+{
+  "tests": [
+    {
+      "name": "Exercises (SQL fundamentals)",
+      "setup": "python -m pip install --upgrade pip && pip install -r requirements.txt",
+      "run": "pytest -q tests/test_exercises.py",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 50
+    },
+    {
+      "name": "Homework (Gradebook DB)",
+      "setup": "python -m pip install --upgrade pip && pip install -r requirements.txt",
+      "run": "pytest -q tests/test_homework.py",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 50
+    }
+  ]
+}
