@@ -3,7 +3,7 @@
     {
       "name": "Exercises",
       "setup": "python -m pip install --upgrade pip && pip install -r requirements.txt",
-      "run": "pytest -q tests/test_exercises.py",
+      "run": "PYTHONPATH=. pytest -q tests/test_exercises.py",
       "input": "",
       "output": "",
       "comparison": "included",
@@ -13,7 +13,7 @@
     {
       "name": "Homework",
       "setup": "python -m pip install --upgrade pip && pip install -r requirements.txt",
-      "run": "pytest -q tests/test_homework.py",
+      "run": "PYTHONPATH=. pytest -q tests/test_homework.py",
       "input": "",
       "output": "",
       "comparison": "included",
