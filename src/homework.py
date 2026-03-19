@@ -164,7 +164,7 @@ def leaderboard(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     rows = conn.execute(
         """
         SELECT
-            s.name AS student,
+            s.name AS student_name,
             ROUND(AVG(1.0 * g.score / a.max_points) * 100, 1) AS avg_percent
         FROM grades g
                  JOIN students s ON g.student_id = s.id

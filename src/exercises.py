@@ -92,10 +92,9 @@ def find_student_by_email(conn: sqlite3.Connection, email: str) -> Optional[sqli
       - Use fetchone()
 
     """
-    email_to_find = email
     row = conn.execute(
         "SELECT  id, name, email From students where email = ?;",
-        (email_to_find,),
+        (email,),
     ).fetchone()
     return row
 
